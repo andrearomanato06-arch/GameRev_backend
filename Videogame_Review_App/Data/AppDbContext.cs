@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using VideogameReviewApp.Models;
+using Videogame_Review_App.Models;
 
-namespace VideogameReviewApp.Data;
+namespace Videogame_Review_App.Data;
 
 public class AppDbContext : DbContext
 {

@@ -1,7 +1,8 @@
-namespace VideogameReviewApp.Models;
+namespace Videogame_Review_App.Models;
 
-using System; 
+using System;
 using System.Collections.Generic;
+
 public class User
 {
     public long Id {get;set;}

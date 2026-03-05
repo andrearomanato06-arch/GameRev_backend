@@ -1,4 +1,4 @@
-namespace VideogameReviewApp.Models;
+namespace Videogame_Review_App.Models;
 
 public class VideogamePlatform
 {
