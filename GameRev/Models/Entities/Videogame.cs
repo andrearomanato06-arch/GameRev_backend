@@ -1,4 +1,4 @@
-namespace GameRev.Models;
+namespace GameRev.Models.Entities;
 
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,9 @@ public class Videogame
 
     public int Objectives {get;set;}
 
-    public DateOnly PublicationDate {get;set;}
+    public DateOnly ReleaseDate {get;set;}
+
+    public bool Released {get;set;} = true;
 
     public List <Platform> Platforms {get;set;} = [];
 

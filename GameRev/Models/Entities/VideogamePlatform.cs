@@ -1,4 +1,4 @@
-namespace GameRev.Models;
+namespace GameRev.Models.Entities;
 
 public class VideogamePlatform
 {

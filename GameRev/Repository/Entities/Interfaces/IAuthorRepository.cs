@@ -1,7 +1,7 @@
 namespace GameRev.Repository.Entities.Interfaces;
 
 using GameRev.Repository.Generic;
-using GameRev.Models;
+using GameRev.Models.Entities;
 
 public interface IAuthorRepository : IGenericCrudRepository<Author>
 {

@@ -1,4 +1,4 @@
-namespace GameRev.Models;
+namespace GameRev.Models.Entities;
 
 using System;
 using System.Collections.Generic;

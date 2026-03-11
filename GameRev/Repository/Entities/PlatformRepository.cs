@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using GameRev.Data;
-using GameRev.Models;
+using GameRev.Models.Entities;
 using GameRev.Repository.Entities.Interfaces;
 using GameRev.Repository.Generic;
 

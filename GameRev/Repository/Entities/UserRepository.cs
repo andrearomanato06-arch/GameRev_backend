@@ -1,5 +1,5 @@
 using GameRev.Data;
-using GameRev.Models;
+using GameRev.Models.Entities;
 using GameRev.Repository.Entities.Interfaces;
 using GameRev.Repository.Generic;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +16,7 @@ public class UserRepository : GenericCrudRepository<User>, IUserRepository
         return await context.Users.FirstOrDefaultAsync(u => u.Email.Equals(email), ct);
     }
 
-    public async Task<User?> GetByUsername(string username, CancellationToken ct)
+    public async Task<User?> GetByUsernameAsync (string username, CancellationToken ct)
     {
         return await context.Users.FirstOrDefaultAsync(u => u.Username.Equals(username), ct);
     }

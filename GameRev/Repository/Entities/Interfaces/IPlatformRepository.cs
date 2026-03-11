@@ -1,4 +1,4 @@
-using GameRev.Models;
+using GameRev.Models.Entities;
 using GameRev.Repository.Generic;
 
 namespace GameRev.Repository.Entities.Interfaces;

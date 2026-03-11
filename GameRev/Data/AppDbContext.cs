@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using GameRev.Models;
+using GameRev.Models.Auth;
+using GameRev.Models.Utils;
+using GameRev.Models.Entities;
 
 namespace GameRev.Data;
 
@@ -20,6 +23,8 @@ public class AppDbContext : DbContext
         {
             a.HasKey(a => a.Id);
 
+            a.HasIndex(a => a.Name).IsUnique();
+
             a.Property(a => a.Id).ValueGeneratedOnAdd();
             a.Property(a => a.Name).HasColumnName("name").HasMaxLength(128).IsRequired();
         });
@@ -27,6 +32,8 @@ public class AppDbContext : DbContext
         mb.Entity<Platform>(p =>
         {
             p.HasKey(p => p.Id);
+
+            p.HasIndex(p => p.Name).IsUnique();
 
             p.Property(p => p.Id).ValueGeneratedOnAdd();
             p.Property(p => p.Name).HasColumnName("name").HasMaxLength(128).IsRequired();
@@ -38,10 +45,11 @@ public class AppDbContext : DbContext
             
             v.Property(v => v.Id).ValueGeneratedOnAdd();
             v.Property(v => v.Title).HasColumnName("title").HasMaxLength(128).IsRequired();
-            v.Property(v => v.Description).HasColumnName("description").HasMaxLength(500).IsRequired();
+            v.Property(v => v.Description).HasColumnName("description").HasMaxLength(int.MaxValue).IsRequired();
             v.Property(v => v.CoverImage).HasColumnName("cover_image").IsRequired();
-            v.Property(v => v.PublicationDate).HasColumnName("publication_date").IsRequired();
+            v.Property(v => v.ReleaseDate).HasColumnName("publication_date").IsRequired();
             v.Property(v => v.AuthorId).HasColumnName("author_id");
+            v.Property(v => v.Released).HasColumnName("released").HasDefaultValue(true);
 
             v.HasOne(v => v.Author)
             .WithMany(a => a.Videogames)
@@ -54,8 +62,8 @@ public class AppDbContext : DbContext
             r.HasKey(r => r.Id);
            
             r.Property(r => r.Id).ValueGeneratedOnAdd();
-            r.Property(r => r.Score).HasColumnName("score");
-            r.Property(r => r.Description).HasColumnName("description").HasMaxLength(500).IsRequired();
+            r.Property(r => r.Rating).HasColumnName("score");
+            r.Property(r => r.Description).HasColumnName("description").HasMaxLength(int.MaxValue).IsRequired();
             r.Property(r => r.ReviewDate).HasColumnName("review_date").IsRequired();
             r.Property(r => r.VideogameId).HasColumnName("videogame_id");
             r.Property(r => r.UserId).HasColumnName("user_id");
@@ -84,6 +92,7 @@ public class AppDbContext : DbContext
             u.Property(u => u.Password).HasColumnName("password").HasMaxLength(64).IsRequired();
             u.Property(u => u.RegistrationDate).HasColumnName("registration_date").IsRequired();
             u.Property(u => u.LastAccess).HasColumnName("last_access_date").IsRequired();
+            u.Property(u => u.Role).HasColumnName("role").HasDefaultValue(UserRole.BASIC).IsRequired();
         });
 
         mb.Entity<VideogamePlatform>(vp =>
@@ -102,6 +111,19 @@ public class AppDbContext : DbContext
             .WithMany(p => p.VideogamePlatforms)
             .HasForeignKey(vp => vp.PlatformId)
             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        mb.Entity<JwtToken>(j =>
+        {
+           j.HasKey(j => j.Id);
+           
+           j.Property(j => j.Id).ValueGeneratedOnAdd().HasColumnName("jwt_token_id");
+           j.Property(j => j.Token).HasColumnName("token").IsRequired();
+
+           j.HasOne(j => j.User)
+           .WithOne(u => u.Token)
+           .HasForeignKey<JwtToken>(j => j.UserId)
+           .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

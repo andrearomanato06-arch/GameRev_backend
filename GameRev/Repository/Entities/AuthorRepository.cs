@@ -1,7 +1,7 @@
 namespace GameRev.Repository.Entities;
 
 using GameRev.Repository.Generic;
-using GameRev.Models;
+using GameRev.Models.Entities;
 using GameRev.Data;
 using GameRev.Repository.Entities.Interfaces;
 

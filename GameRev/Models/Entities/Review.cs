@@ -1,4 +1,4 @@
-namespace GameRev.Models;
+namespace GameRev.Models.Entities;
 
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ public class Review
 {
     public long Id {get;set;}
 
-    public int Score {get;set;}
+    public double Rating {get;set;}
 
     public string Description {get;set;}
     
