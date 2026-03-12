@@ -8,7 +8,6 @@ namespace GameRev.Repository.Entities;
 
 public class PlatformRepository : GenericCrudRepository<Platform>, IPlatformRepository
 {
-
     public PlatformRepository(AppDbContext context) : base(context) {}
     public async Task<Platform?> GetByNameAsync(string name, CancellationToken ct)
     {
