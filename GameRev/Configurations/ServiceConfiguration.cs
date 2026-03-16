@@ -1,3 +1,5 @@
+using GameRev.Services.Auth;
+using GameRev.Services.Auth.Interfaces;
 using GameRev.Services.Entities;
 using GameRev.Services.Entities.Interfaces;
 using GameRev.Services.Interfaces;
@@ -13,6 +15,8 @@ public static class ServiceConfiguration
         service.AddScoped<IUserService,UserService>();
         service.AddScoped<IVideogameService, VideogameService>();
         service.AddScoped<IReviewService, ReviewService>();
+        service.AddScoped<IUserSessionService, UserSessionService>();
+        service.AddScoped<IAccessService, AccessService>();
         return service;
     }
 }

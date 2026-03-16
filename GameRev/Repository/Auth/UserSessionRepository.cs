@@ -8,11 +8,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameRev.Repository.Auth;
 
-public class JwtTokenRepository : IUserSessionRepository
+public class UserSessionRepository : IUserSessionRepository
 {
     private readonly AppDbContext context;
     private readonly IUserRepository userRepo;
-    public JwtTokenRepository(AppDbContext context, IUserRepository userRepo)
+    
+    public UserSessionRepository(AppDbContext context, IUserRepository userRepo)
     {
         this.context = context;
         this.userRepo = userRepo;
