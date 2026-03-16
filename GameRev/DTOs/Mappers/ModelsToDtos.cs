@@ -1,4 +1,5 @@
 using GameRev.DTOs.Responses;
+using GameRev.Models.Auth;
 using GameRev.Models.Entities;
 
 namespace GameRev.DTOs.Mappers;

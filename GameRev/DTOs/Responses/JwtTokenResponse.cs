@@ -1,4 +1,4 @@
-namespace GameRev.DTOs.Auth;
+namespace GameRev.DTOs.Responses;
 
 public class JwtTokenResponse
 {
