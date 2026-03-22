@@ -2,6 +2,7 @@ using GameRev.DTOs.Mappers;
 using GameRev.DTOs.Requests;
 using GameRev.DTOs.Responses;
 using GameRev.Models.Auth;
+using GameRev.Repository.Auth;
 using GameRev.Repository.Auth.Interfaces;
 using GameRev.Services.Auth.Interfaces;
 using GameRev.Services.Interfaces;

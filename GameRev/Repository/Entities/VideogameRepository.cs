@@ -115,7 +115,7 @@ public class VideogameRepository : GenericCrudRepository<Videogame>, IVideogameR
         IQueryable<Videogame> query = context.Videogames.AsNoTracking();
 
         if(filter.Title != null)
-            query = query.Where(v => v.Title.ToLower().Contains(filter.Title.ToLower()));
+            query = query.Where(v => v.Title.Contains(filter.Title));
 
         if(filter.Platform != null)
             query = query.Where(v => v.Platforms.Any(p => p.Name.Contains(filter.Platform)));
