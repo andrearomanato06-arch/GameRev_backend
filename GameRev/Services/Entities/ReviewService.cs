@@ -15,12 +15,14 @@ public class ReviewService : IReviewService
     private readonly IReviewRepository reviewRepository;
     private readonly IVideogameRepository videogameRepository;
     private readonly IUserRepository userRepository;
+    private readonly ILogger<ReviewService> logger;
 
-    public ReviewService(IReviewRepository reviewRepository, IVideogameRepository videogameRepository, IUserRepository userRepository)
+    public ReviewService(IReviewRepository reviewRepository, IVideogameRepository videogameRepository, IUserRepository userRepository, ILogger<ReviewService> logger)
     {
         this.reviewRepository = reviewRepository;
         this.videogameRepository = videogameRepository;
         this.userRepository = userRepository;
+        this.logger = logger;
     }
 
     public async Task<ReviewResponse?> AddAsync(ReviewRequest request, CancellationToken ct)
@@ -35,7 +37,11 @@ public class ReviewService : IReviewService
     public async Task<bool> DeleteAsync(long id, CancellationToken ct)
     {
         var review = await reviewRepository.GetByIdAsync(id,ct);
-        if(review is null) return false;
+        if(review is null)
+        {
+            logger.LogWarning("Failed to find review with ID: ${Id}", id);
+            return false;    
+        }
         return await reviewRepository.DeleteAsync(review,ct);
     }
 
@@ -72,7 +78,11 @@ public class ReviewService : IReviewService
     public async Task<bool> UpdateAsync(UpdateReviewRequest request, CancellationToken ct)
     {
         var review = await reviewRepository.GetByIdAsync(request.Id,ct);
-        if(review is null) return false;
+        if(review is null)
+        {
+            logger.LogWarning("Failed to fetch review with ID: ${Id}", request.Id);
+            return false;
+        }
         UpdateModel.UpdateReviewFromDto(review,request);
         return await reviewRepository.UpdateAsync(review,ct);
     }

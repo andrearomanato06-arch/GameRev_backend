@@ -12,13 +12,15 @@ namespace GameRev.Services.Entities;
 public class VideogameService : IVideogameService
 {
     private readonly IVideogameRepository videogameRepository;
+    private readonly ILogger<VideogameService> logger;
     private readonly IWebHostEnvironment webHostEnvironment;
     private readonly List<string> validExtensions = new List<string> {".jpeg",".png",".jpg",".webp"};
 
-    public VideogameService(IVideogameRepository videogameRepository, IWebHostEnvironment webHostEnvironment)
+    public VideogameService(IVideogameRepository videogameRepository, IWebHostEnvironment webHostEnvironment, ILogger<VideogameService> logger)
     {
         this.videogameRepository = videogameRepository;
         this.webHostEnvironment = webHostEnvironment;
+        this.logger = logger;
     }
 
     public async Task<VideogameResponse?> AddAsync(VideogameRequest request, CancellationToken ct)
@@ -26,7 +28,7 @@ public class VideogameService : IVideogameService
         string? path = await SaveCoverImage(request.CoverImage, request.Title);
         if(path is null)
         {
-            //log
+            logger.LogError("Failed to get the image path because it's  null");
             return null;
         }
 
@@ -60,7 +62,11 @@ public class VideogameService : IVideogameService
     public async Task<VideogameResponse?> GetByTitleAsync(string title, CancellationToken ct)
     {
         var videogame = await videogameRepository.GetByTitleAsync(title,ct);
-        if(videogame is null) return null;
+        if(videogame is null)
+        {
+            logger.LogError("Failed to fetch videogame with title: ${Title}", title);
+            return null;
+        }
         return ModelsToDtos.VideogameToVideogameResponse(videogame);
     }
 
@@ -77,7 +83,11 @@ public class VideogameService : IVideogameService
     public async Task<bool> RemoveAsync(long id, CancellationToken ct)
     {
         var videogame = await videogameRepository.GetByIdAsync(id,ct);
-        if(videogame is null) return false;
+        if(videogame is null)
+        {
+            logger.LogError("Failed to find videogame with ID: ${Id}", id);
+            return false;
+        }
         return await videogameRepository.DeleteAsync(videogame,ct);
     }
 
@@ -89,14 +99,22 @@ public class VideogameService : IVideogameService
     public async Task<bool> UpdateAsync(UpdateVideogameRequest request, CancellationToken ct)
     {
         var videogame = await videogameRepository.GetByIdAsync(request.Id, ct);
-        if(videogame is null) return false;
-
+        if(videogame is null)
+        {
+            logger.LogError("Failed to find videogame with the specified ID: {Id}", request.Id);
+            return false;
+        }
+        
         string? newImgPath = null;
         if(request.CoverImage is not null && request.Title is not null)
         {
             newImgPath = await SaveCoverImage(request.CoverImage, request.Title);
-            if(newImgPath is null) return false;
-        }
+            if(newImgPath is null)
+            {
+                logger.LogError("Failed to get the image path because it's  null");
+                return false;
+            }
+        } 
 
         UpdateModel.UpdateVideogameFromDto(videogame, request, newImgPath);
         return await videogameRepository.UpdateAsync(videogame,ct);
@@ -114,8 +132,8 @@ public class VideogameService : IVideogameService
         {
             if (!validExtensions.Contains(image.FileName))
             {
+                logger.LogError("Invalid Exception provided");
                 return null;
-                //log invalid extension provided
             }
 
             var fileName = videogameTitle.ToLower().Trim().Replace(" ", "-") + ".webp";
@@ -133,8 +151,7 @@ public class VideogameService : IVideogameService
                 
         }catch(Exception e)
         {
-            //log error
-            Console.WriteLine(e);
+            logger.LogError(e, "An error occurred while saving the image");
             return null;
         }    
 

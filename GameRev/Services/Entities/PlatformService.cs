@@ -12,10 +12,12 @@ public class PlatformService : IPlatformService
 {
 
     private readonly IPlatformRepository platformRepository;
-
-    public PlatformService(IPlatformRepository platformRepository)
+    private readonly ILogger<PlatformService> logger;
+    
+    public PlatformService(IPlatformRepository platformRepository, ILogger<PlatformService> logger)
     {
         this.platformRepository = platformRepository;
+        this.logger = logger;
     }
 
     public async Task<PlatformResponse?> AddAsync(PlatformRequest request, CancellationToken ct)
@@ -30,7 +32,11 @@ public class PlatformService : IPlatformService
     public async Task<bool> DeleteAsync(long id, CancellationToken ct)
     {
         var platform = await platformRepository.GetByIdAsync(id,ct);
-        if(platform is null) return false;
+        if(platform is null)
+        {
+            logger.LogWarning("Failed to find platform with ID: ${Id}", id);
+            return false;
+        }
         return await platformRepository.DeleteAsync(platform,ct);
     }
 
@@ -59,7 +65,11 @@ public class PlatformService : IPlatformService
     public async Task<bool> UpdatePlatformAsync(UpdatePlatformRequest request, CancellationToken ct)
     {
         var platform = await platformRepository.GetByIdAsync(request.Id,ct);
-        if(platform is null) return false;
+        if(platform is null)
+        {
+            logger.LogWarning("Failed to find platform with ID: ${Id}", request.Id);
+            return false;
+        }
         UpdateModel.UpdatePlatformFromDto(platform,request);
         return await platformRepository.UpdateAsync(platform,ct);
     }

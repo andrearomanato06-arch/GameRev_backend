@@ -1,6 +1,7 @@
 using GameRev.DTOs.Requests;
 using GameRev.DTOs.Requests.Update;
 using GameRev.Services.Entities.Interfaces;
+using GameRev.Validators;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameRev.Controllers;
@@ -10,6 +11,8 @@ namespace GameRev.Controllers;
 public class UserController : ControllerBase{
     
     private readonly IUserService userService;
+    private readonly UserValidator userValidator;
+    private readonly UpdateUserValidator updateUserValidator;
 
     public UserController (IUserService userService)
     {
@@ -64,7 +67,11 @@ public class UserController : ControllerBase{
     [HttpPost]
     public async Task<IActionResult> Insert (UserRequest request, CancellationToken ct)
     {
-        //validator
+        var validationResult = await userValidator.ValidateAsync(request,ct);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest("Validation Error");
+        }
         var user = await userService.AddAsync(request, ct);
         if(user is null)
         {
@@ -76,6 +83,11 @@ public class UserController : ControllerBase{
     [HttpPut]
     public async Task<IActionResult> Update (UpdateUserRequest request, CancellationToken ct)
     {
+        var validationResult = await updateUserValidator.ValidateAsync(request,ct);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest("Validation Error");
+        }
         var success = await userService.UpdateAsync(request, ct);
         if(!success)
         {

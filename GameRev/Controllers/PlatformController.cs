@@ -2,6 +2,7 @@ using GameRev.DTOs.Requests;
 using GameRev.DTOs.Requests.Update;
 using GameRev.Models.Entities;
 using GameRev.Services.Interfaces;
+using GameRev.Validators;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameRev.Controllers;
@@ -12,6 +13,7 @@ public class PlatformController : ControllerBase
 {
 
     private readonly IPlatformService platformService;
+    private readonly PlatformValidator platformValidator;
 
     public PlatformController(IPlatformService platformService)
     {
@@ -43,6 +45,11 @@ public class PlatformController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddNew (PlatformRequest request, CancellationToken ct)
     {
+        var validationResult = await platformValidator.ValidateAsync(request, ct);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest("Validation Error");
+        }
         var platform = await platformService.AddAsync(request,ct);
         if(platform is null)
         {

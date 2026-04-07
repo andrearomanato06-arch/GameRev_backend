@@ -17,12 +17,10 @@ public class AuthController : ControllerBase
 
     private readonly IValidator<RegistrationRequest> registrationValidator;
     private readonly IValidator<LoginRequest> loginValidator;
-    private readonly IUserSessionService userSessionService;
 
     public AuthController(IAccessService accessService, IUserSessionService userSessionService)
     {
         this.accessService = accessService;
-        this.userSessionService = userSessionService;
     }
 
     [HttpPost("user/register")]

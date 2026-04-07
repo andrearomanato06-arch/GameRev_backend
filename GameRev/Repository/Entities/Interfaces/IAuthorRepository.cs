@@ -5,5 +5,5 @@ using GameRev.Models.Entities;
 
 public interface IAuthorRepository : IGenericCrudRepository<Author>
 {
-    
+    Task<bool> ExistsByNameAsync (string name, CancellationToken ct);
 }

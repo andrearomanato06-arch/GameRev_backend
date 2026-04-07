@@ -1,7 +1,9 @@
 using GameRev.DTOs.Requests;
 using GameRev.DTOs.Requests.Update;
+using GameRev.Models.Entities;
 using GameRev.Services.Entities;
 using GameRev.Services.Entities.Interfaces;
+using GameRev.Validators;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameRev.Controllers;
@@ -11,6 +13,7 @@ namespace GameRev.Controllers;
 public class AuthorController : ControllerBase
 {
     private readonly IAuthorService authorService;
+    private readonly AuthorValidator authorValidator;
 
     public AuthorController(IAuthorService authorService)
     {
@@ -42,6 +45,11 @@ public class AuthorController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Insert (AuthorRequest request, CancellationToken ct)
     {
+        var validationResult = await authorValidator.ValidateAsync(request,ct);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest("Validation Error");
+        }
         var author = await authorService.AddAsync(request, ct);
         if(author is null)
         {

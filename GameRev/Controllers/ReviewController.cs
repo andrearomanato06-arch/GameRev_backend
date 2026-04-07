@@ -1,6 +1,8 @@
 using GameRev.DTOs.Requests;
 using GameRev.DTOs.Requests.Update;
+using GameRev.Models.Entities;
 using GameRev.Services.Entities.Interfaces;
+using GameRev.Validators;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameRev.Controllers;
@@ -11,6 +13,7 @@ public class ReviewController : ControllerBase
 {
     
     private readonly IReviewService reviewService;
+    private readonly ReviewValidators reviewValidator;
 
     public ReviewController(IReviewService reviewService)
     {
@@ -55,7 +58,11 @@ public class ReviewController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddNewReview (ReviewRequest request, CancellationToken ct)
     {
-        //validators
+        var validationResult = await reviewValidator.ValidateAsync(request,ct);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest("Validation Error");
+        }
         var review = reviewService.AddAsync(request,ct);
         if(review is null)
         {

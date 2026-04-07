@@ -18,4 +18,6 @@ public interface IVideogameRepository : IGenericCrudRepository<Videogame>
     Task<PagedResponse<MinimalVideogameResponse>> SearchAsync (VideogameSearchFilter filter,int page, int elementsToShow, CancellationToken ct);
 
     Task<List<MinimalVideogameResponse>> GetCasualGames (int limit, CancellationToken ct);
+
+    Task<bool> ExistsByIdAsync (long id, CancellationToken ct);
 }

@@ -1,4 +1,5 @@
 using FluentValidation;
+using GameRev.DTOs.Requests;
 using GameRev.DTOs.Requests.Update;
 using GameRev.Models.Utils;
 using GameRev.Repository.Entities.Interfaces;
@@ -6,9 +7,36 @@ using GameRev.Validators.Utils;
 
 namespace GameRev.Validators;
 
-public class UserValidator : AbstractValidator<UpdateUserRequest>
+public class UserValidator : AbstractValidator<UserRequest>
 {
     public UserValidator(IUserRepository userRepository)
+    {
+        RuleFor(x => x.Username)
+            .NotNull().WithMessage("Username can't be null")
+            .NotEmpty().WithMessage("Username can't be empty")
+            .MustAsync(async (username, ct) =>
+            {
+                return ! await userRepository.ExistsByUsername(username,ct);
+            }).WithMessage("This username is alredy in use");
+        
+        RuleFor(x => x.Email)
+            .IsEmailFormatValid()
+            .MustAsync(async (username, ct) =>
+            {
+                return ! await userRepository.ExistsByUsername(username,ct);
+            }).WithMessage("This username is alredy in use");
+        
+        RuleFor(x => x.Password).IsPasswordFormatValid();
+
+        RuleFor(x => x.RegistrationDate).LessThanOrEqualTo(DateTime.Now);
+
+        RuleFor(x => x.Role).Must(x => x == UserRole.BASIC || x == UserRole.ADMIN);
+    }
+}
+
+public class UpdateUserValidator : AbstractValidator<UpdateUserRequest>
+{
+    public UpdateUserValidator(IUserRepository userRepository)
     {
         RuleFor(x => x.Id).MustAsync(async (id,ct) =>
         {

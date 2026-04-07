@@ -13,10 +13,12 @@ public class UserService : IUserService
 {
 
     private readonly IUserRepository userRepository;
+    private readonly ILogger<UserService> logger;
 
-    public UserService (IUserRepository userRepository)
+    public UserService (IUserRepository userRepository, ILogger<UserService> logger)
     {
         this.userRepository = userRepository;
+        this.logger = logger;
     }
 
     public async Task<UserResponse?> AddAsync(UserRequest request, CancellationToken ct)
@@ -61,14 +63,22 @@ public class UserService : IUserService
     public async Task<bool> RemoveAsync(long id, CancellationToken ct)
     {
         var user = await userRepository.GetByIdAsync(id,ct);
-        if(user is null) return false;
+        if(user is null)
+        {
+            logger.LogWarning("Failed to find user with ID: ${Id}", id);
+            return false;
+        }
         return await userRepository.DeleteAsync(user,ct);
     }
 
     public async Task<bool> UpdateAsync(UpdateUserRequest request, CancellationToken ct)
     {
         var user = await userRepository.GetByIdAsync(request.Id, ct);
-        if(user is null) return false;
+        if(user is null)
+        {
+            logger.LogWarning("Failed to find user with ID: ${Id}", request.Id);
+            return false;
+        }
         UpdateModel.UpdateUserFromDto(user,request);
         return await userRepository.UpdateAsync(user,ct);
     }

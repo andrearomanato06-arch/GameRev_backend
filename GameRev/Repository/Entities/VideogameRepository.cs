@@ -6,7 +6,6 @@ using GameRev.Repository.Generic;
 using GameRev.DTOs.Filters;
 using GameRev.DTOs.Responses;
 using GameRev.DTOs.Mappers;
-using System.Security.Principal;
 
 namespace GameRev.Repository.Entities;
 
@@ -174,5 +173,10 @@ public class VideogameRepository : GenericCrudRepository<Videogame>, IVideogameR
         .FirstOrDefaultAsync(ct);
 
         return ModelsToDtos.VideogameToVideogameResponse(videogame.Videogame, videogame.AvgRating);
+    }
+
+    public async Task<bool> ExistsByIdAsync (long id, CancellationToken ct)
+    {
+        return await context.VideogamePlatforms.AnyAsync(v => v.VideogameId == id, ct);
     }
 }

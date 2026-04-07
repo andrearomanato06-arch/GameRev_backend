@@ -16,11 +16,13 @@ public class UserSessionService : IUserSessionService
 
     private readonly IUserSessionRepository userSessionRepository;
     private readonly IUserRepository userRepository;
+    private readonly ILogger<UserSessionService> logger;
 
-    public UserSessionService (IUserSessionRepository userSessionRepository, IUserRepository userRepository)
+    public UserSessionService (IUserSessionRepository userSessionRepository, IUserRepository userRepository, ILogger<UserSessionService> logger)
     {
         this.userSessionRepository = userSessionRepository;
         this.userRepository = userRepository;
+        this.logger = logger;
     }
 
     public async Task<UserSession?> AddAsync(UserSession userSession, CancellationToken ct)
@@ -50,9 +52,10 @@ public class UserSessionService : IUserSessionService
 
     public async Task<string?> GenerateJwtToken(User user, CancellationToken ct)
     {
-        var searchedUser = await CheckIfUserExist(user,ct);
+        var searchedUser = await userRepository.GetByIdAsync(user.Id, ct);
         if(searchedUser is null)
         {
+            logger.LogWarning("Failed to fetch user with ID: ${Id}", user.Id);
             return null;
         }
 
@@ -60,8 +63,8 @@ public class UserSessionService : IUserSessionService
         session = await userSessionRepository.AddAsync(session,ct);
         if(session is null)
         {
+            logger.LogError("Failed to close session for user ${Id}",searchedUser.Id);
             return null;
-            //log error
         }
 
         //! ENV DATA
@@ -87,24 +90,13 @@ public class UserSessionService : IUserSessionService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private async Task<User?> CheckIfUserExist(User user, CancellationToken ct)
-    {
-        var searchedUser = await userRepository.GetByIdAsync(user.Id, ct);
-        if(searchedUser is null)
-        {
-            return null;
-            //log
-        }
-        return searchedUser;
-    }
-
     private async Task<UserSession> CheckIfUserSessionAlredyExist(User user, CancellationToken ct)
     {
         var session = await userSessionRepository.GetSessionByUserId(user.Id, ct);
         if(session is not null)
         {
            await userSessionRepository.EndSessionAsync(session,ct);
-           //log old session destroyed
+           logger.LogInformation("Old session destroyed for user ${Id}", user.Id);
         }
         var issueTime = DateTime.Now;
         return new UserSession

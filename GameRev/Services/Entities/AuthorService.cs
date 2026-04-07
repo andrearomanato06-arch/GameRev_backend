@@ -11,10 +11,12 @@ namespace GameRev.Services.Entities;
 public class AuthorService : IAuthorService
 {
     private readonly IAuthorRepository authorRepository;
+    private readonly ILogger<AuthorService> logger;
 
-    public AuthorService (IAuthorRepository authorRepository)
+    public AuthorService (IAuthorRepository authorRepository, ILogger<AuthorService> logger)
     {
         this.authorRepository = authorRepository;
+        this.logger = logger;
     }
 
     public async Task<AuthorResponse?> AddAsync(AuthorRequest request, CancellationToken ct)
@@ -43,14 +45,22 @@ public class AuthorService : IAuthorService
     public async Task<bool> RemoveAsync(long id, CancellationToken ct)
     {
         var author = await authorRepository.GetByIdAsync(id,ct);
-        if(author is null) return false;
+        if(author is null)
+        {
+            logger.LogWarning("Failed to find author with ID: ${Id}", id); 
+            return false;
+        }
         return await authorRepository.DeleteAsync(author,ct);
     }
 
     public async Task<bool> UpdateAsync(UpdateAuthorRequest request, CancellationToken ct)
     {
         var author = await authorRepository.GetByIdAsync(request.Id,ct);
-        if(author is null) return false;
+        if(author is null)
+        {
+            logger.LogError("Failed to get author with ID ${Id}", request.Id);
+            return false;
+        }
         UpdateModel.UpdateAuthorFromDto(author,request);
         return await authorRepository.UpdateAsync(author,ct);
     }

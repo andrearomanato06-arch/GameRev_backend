@@ -13,4 +13,9 @@ public class PlatformRepository : GenericCrudRepository<Platform>, IPlatformRepo
     {
         return await context.Platforms.FirstOrDefaultAsync(p => p.Name.Equals(name),ct);
     }
+
+    public async Task<bool> ExistsByNameAsync (string name, CancellationToken ct)
+    {
+        return await context.Platforms.AnyAsync(p => p.Name.Equals(name), ct);
+    }
 }

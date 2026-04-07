@@ -2,6 +2,7 @@ using GameRev.DTOs.Filters;
 using GameRev.DTOs.Requests;
 using GameRev.DTOs.Requests.Update;
 using GameRev.Services.Entities.Interfaces;
+using GameRev.Validators;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameRev.Controllers;
@@ -12,6 +13,7 @@ public class VideogameController : ControllerBase
 {
 
     private readonly IVideogameService videogameService;
+    private readonly VideogameRequestValidators videogameValidator;
 
     public VideogameController(IVideogameService videogameService)
     {
@@ -76,7 +78,11 @@ public class VideogameController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddNewVideogame ([FromBody] VideogameRequest request, CancellationToken ct)
     {
-        //validation
+        var validationResult = await videogameValidator.ValidateAsync(request,ct);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest("Validation Error");
+        }
         var videogame = await videogameService.AddAsync(request,ct);
         if(videogame is null)
         {
