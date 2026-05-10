@@ -4,6 +4,7 @@ using GameRev.DTOs.Requests;
 using GameRev.DTOs.Requests.Update;
 using GameRev.DTOs.Responses;
 using GameRev.Models.Utils;
+using GameRev.Repository.Entities;
 using GameRev.Repository.Entities.Interfaces;
 using GameRev.Services.Entities.Interfaces;
 
@@ -12,15 +13,18 @@ namespace GameRev.Services.Entities;
 public class VideogameService : IVideogameService
 {
     private readonly IVideogameRepository videogameRepository;
+
+    private readonly IPlatformRepository platformRepository;
     private readonly ILogger<VideogameService> logger;
     private readonly IWebHostEnvironment webHostEnvironment;
-    private readonly List<string> validExtensions = new List<string> {".jpeg",".png",".jpg",".webp"};
+    private readonly List<string> validExtensions = new List<string> {"jpeg","png","jpg","webp"};
 
-    public VideogameService(IVideogameRepository videogameRepository, IWebHostEnvironment webHostEnvironment, ILogger<VideogameService> logger)
+    public VideogameService(IVideogameRepository videogameRepository, IWebHostEnvironment webHostEnvironment, ILogger<VideogameService> logger, IPlatformRepository platformRepository)
     {
         this.videogameRepository = videogameRepository;
         this.webHostEnvironment = webHostEnvironment;
         this.logger = logger;
+        this.platformRepository = platformRepository;
     }
 
     public async Task<VideogameResponse?> AddAsync(VideogameRequest request, CancellationToken ct)
@@ -32,8 +36,8 @@ public class VideogameService : IVideogameService
             return null;
         }
 
-        var videogame = DtosToModels.VideogameRequestToVideogame(request, path);
-        var response = await videogameRepository.AddAsync(videogame,ct);
+        var videogame = await DtosToModels.VideogameRequestToVideogame(request, path, platformRepository);
+        var response = await videogameRepository.AddVideogameAsync(videogame,ct);
         return response is not null
         ? ModelsToDtos.VideogameToVideogameResponse(response)
         : null;
@@ -116,7 +120,7 @@ public class VideogameService : IVideogameService
             }
         } 
 
-        UpdateModel.UpdateVideogameFromDto(videogame, request, newImgPath);
+        UpdateModel.UpdateVideogameFromDto(videogame, request, newImgPath, platformRepository);
         return await videogameRepository.UpdateAsync(videogame,ct);
     }
 
@@ -128,9 +132,13 @@ public class VideogameService : IVideogameService
     private async Task<string?> SaveCoverImage (IFormFile image, string videogameTitle)
     {
         string? path;
+        logger.LogInformation("File Name: {Ext}", image.FileName);
+        var pathToStr = image.FileName.ToString();
+        var fileExtIndex = pathToStr.LastIndexOf(".");
+        var extension = pathToStr.Split(".", fileExtIndex);
         try
         {
-            if (!validExtensions.Contains(image.FileName))
+            if (!validExtensions.Contains(extension[1]))
             {
                 logger.LogError("Invalid Exception provided");
                 return null;

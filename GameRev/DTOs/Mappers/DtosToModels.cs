@@ -1,5 +1,6 @@
 using GameRev.DTOs.Requests;
 using GameRev.Models.Entities;
+using GameRev.Repository.Entities.Interfaces;
 
 namespace GameRev.DTOs.Mappers;
 
@@ -45,7 +46,7 @@ public static class DtosToModels
         };
     }
 
-    public static Videogame VideogameRequestToVideogame (VideogameRequest request, string coverImagePath)
+    public async static Task<Videogame> VideogameRequestToVideogame (VideogameRequest request, string coverImagePath, IPlatformRepository platformRepository)
     {
         return new Videogame
         {
@@ -55,7 +56,7 @@ public static class DtosToModels
             Objectives = request.Objectives,
             ReleaseDate = request.ReleaseDate,
             Released = request.Released,
-            Platforms = request.Platforms,
+            Platforms = await platformRepository.GetByIds(request.Platforms),
             AuthorId = request.AuthorId
         };
     }

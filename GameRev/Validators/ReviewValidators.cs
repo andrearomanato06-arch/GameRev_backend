@@ -27,7 +27,7 @@ public class ReviewValidators : AbstractValidator<ReviewRequest>
             .NotEmpty().WithMessage("Videogame ID can't be empty")
             .MustAsync(async (videogameId, ct) =>
             {
-                return await videogameRepository.ExistsByIdAsync(videogameId, ct);
+                return !await videogameRepository.ExistsByIdAsync(videogameId, ct);
             }).WithMessage("The videogame ID provided don't exists");
         
         RuleFor(x => x.UserId)
@@ -35,7 +35,7 @@ public class ReviewValidators : AbstractValidator<ReviewRequest>
             .NotEmpty().WithMessage("User ID can't be empty")
             .MustAsync(async (userId, ct) =>
             {
-                return ! await userRepository.ExistsById(userId, ct);
+                return await userRepository.ExistsById(userId, ct);
             }).WithMessage("Cannot find the specified user ID");
     }
 

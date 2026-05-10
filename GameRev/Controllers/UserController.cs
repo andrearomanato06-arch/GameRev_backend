@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 using GameRev.DTOs.Requests;
 using GameRev.DTOs.Requests.Update;
 using GameRev.Services.Entities.Interfaces;
@@ -11,12 +13,14 @@ namespace GameRev.Controllers;
 public class UserController : ControllerBase{
     
     private readonly IUserService userService;
-    private readonly UserValidator userValidator;
-    private readonly UpdateUserValidator updateUserValidator;
+    private readonly IValidator<UserRequest> userValidator;
+    private readonly IValidator<UpdateUserRequest> updateUserValidator;
 
-    public UserController (IUserService userService)
+    public UserController (IUserService userService, IValidator<UserRequest> userValidator, IValidator<UpdateUserRequest> updateUserValidator)
     {
         this.userService = userService;
+        this.userValidator = userValidator;
+        this.updateUserValidator = updateUserValidator;
     }
 
     [HttpGet]
@@ -65,12 +69,12 @@ public class UserController : ControllerBase{
     }
 
     [HttpPost]
-    public async Task<IActionResult> Insert (UserRequest request, CancellationToken ct)
+    public async Task<IActionResult> Insert ([FromBody] UserRequest request, CancellationToken ct)
     {
         var validationResult = await userValidator.ValidateAsync(request,ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest("Validation Error");
+            return BadRequest(validationResult.Errors);
         }
         var user = await userService.AddAsync(request, ct);
         if(user is null)
@@ -81,12 +85,12 @@ public class UserController : ControllerBase{
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update (UpdateUserRequest request, CancellationToken ct)
+    public async Task<IActionResult> Update ([FromBody] UpdateUserRequest request, CancellationToken ct)
     {
         var validationResult = await updateUserValidator.ValidateAsync(request,ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest("Validation Error");
+            return BadRequest(validationResult.Errors);
         }
         var success = await userService.UpdateAsync(request, ct);
         if(!success)
@@ -96,8 +100,8 @@ public class UserController : ControllerBase{
         return Ok();
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete ([FromRoute] long id, CancellationToken ct)
+    [HttpDelete]
+    public async Task<IActionResult> Delete ([FromQuery] long id, CancellationToken ct)
     {
         var success = await userService.RemoveAsync(id, ct);
         if (!success)

@@ -120,7 +120,7 @@ public static class ModelsToDtos
             Objectives = videogame.Objectives,
             ReleaseDate = videogame.ReleaseDate,
             Released = videogame.Released,
-            Platforms = videogame.Platforms,
+            Platforms = GetPlatformsIds(videogame.Platforms),
             AuthorId = videogame.AuthorId,
         };
     }
@@ -139,7 +139,7 @@ public static class ModelsToDtos
                 Objectives = videogame.Objectives,
                 ReleaseDate = videogame.ReleaseDate,
                 Released = videogame.Released,
-                Platforms = videogame.Platforms,
+                Platforms = GetPlatformsIds(videogame.Platforms),
                 AuthorId = videogame.AuthorId            
             });
         }
@@ -157,7 +157,7 @@ public static class ModelsToDtos
             Objectives = videogame.Objectives,
             ReleaseDate = videogame.ReleaseDate,
             Released = videogame.Released,
-            Platforms = videogame.Platforms,
+            Platforms = GetPlatformsIds(videogame.Platforms),
             AuthorId = videogame.AuthorId,
             AverageRating = avgRating
         };
@@ -176,5 +176,15 @@ public static class ModelsToDtos
             });
         }
         return response;
+    }
+
+    private static List<long> GetPlatformsIds(List<Platform> platforms)
+    {
+        List<long> platformsIds = [];
+        foreach(Platform p in platforms)
+        {
+            platformsIds.Add(p.Id);
+        }
+        return platformsIds;
     }
 }

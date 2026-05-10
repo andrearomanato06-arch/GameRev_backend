@@ -1,3 +1,4 @@
+using FluentValidation;
 using GameRev.DTOs.Requests;
 using GameRev.DTOs.Requests.Update;
 using GameRev.Models.Entities;
@@ -13,11 +14,12 @@ public class ReviewController : ControllerBase
 {
     
     private readonly IReviewService reviewService;
-    private readonly ReviewValidators reviewValidator;
+    private readonly IValidator<ReviewRequest> reviewValidator;
 
-    public ReviewController(IReviewService reviewService)
+    public ReviewController(IReviewService reviewService, IValidator<ReviewRequest> reviewValidator)
     {
         this.reviewService = reviewService;
+        this.reviewValidator = reviewValidator;
     }
 
     [HttpGet()]
@@ -56,14 +58,14 @@ public class ReviewController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddNewReview (ReviewRequest request, CancellationToken ct)
+    public async Task<IActionResult> AddNewReview ([FromBody] ReviewRequest request, CancellationToken ct)
     {
         var validationResult = await reviewValidator.ValidateAsync(request,ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest("Validation Error");
+            return BadRequest(validationResult.Errors);
         }
-        var review = reviewService.AddAsync(request,ct);
+        var review = await reviewService.AddAsync(request,ct);
         if(review is null)
         {
             return BadRequest();
@@ -72,7 +74,7 @@ public class ReviewController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> UpdateReview (UpdateReviewRequest request, CancellationToken ct)
+    public async Task<IActionResult> UpdateReview ([FromBody] UpdateReviewRequest request, CancellationToken ct)
     {
         //validator
         var success = await reviewService.UpdateAsync(request,ct);
@@ -84,7 +86,7 @@ public class ReviewController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<IActionResult> DeleteReview (long id, CancellationToken ct)
+    public async Task<IActionResult> DeleteReview ([FromQuery] long id, CancellationToken ct)
     {
         var success = await reviewService.DeleteAsync(id,ct);
         if (!success)

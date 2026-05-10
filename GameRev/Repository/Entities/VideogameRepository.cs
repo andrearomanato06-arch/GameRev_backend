@@ -6,6 +6,7 @@ using GameRev.Repository.Generic;
 using GameRev.DTOs.Filters;
 using GameRev.DTOs.Responses;
 using GameRev.DTOs.Mappers;
+using GameRev.DTOs.Requests;
 
 namespace GameRev.Repository.Entities;
 
@@ -171,12 +172,28 @@ public class VideogameRepository : GenericCrudRepository<Videogame>, IVideogameR
             AvgRating = gr.Reviews.Average(r => r.Rating)
         })
         .FirstOrDefaultAsync(ct);
-
         return ModelsToDtos.VideogameToVideogameResponse(videogame.Videogame, videogame.AvgRating);
     }
 
     public async Task<bool> ExistsByIdAsync (long id, CancellationToken ct)
     {
         return await context.VideogamePlatforms.AnyAsync(v => v.VideogameId == id, ct);
+    }
+
+    public async Task<Videogame?> AddVideogameAsync(Videogame videogame, CancellationToken ct)
+    {
+        await context.Videogames.AddAsync(videogame, ct);
+        await context.SaveChangesAsync(ct);
+        
+        foreach(Platform p in videogame.Platforms)
+        {
+            await context.VideogamePlatforms.AddAsync(new VideogamePlatform
+            {
+                VideogameId = videogame.Id,
+                PlatformId = p.Id
+            }, ct);
+        }
+        await context.SaveChangesAsync(ct);
+        return videogame is null ? null : videogame;
     }
 }

@@ -20,4 +20,6 @@ public interface IVideogameRepository : IGenericCrudRepository<Videogame>
     Task<List<MinimalVideogameResponse>> GetCasualGames (int limit, CancellationToken ct);
 
     Task<bool> ExistsByIdAsync (long id, CancellationToken ct);
+
+    Task<Videogame?> AddVideogameAsync(Videogame videogame, CancellationToken ct);
 }

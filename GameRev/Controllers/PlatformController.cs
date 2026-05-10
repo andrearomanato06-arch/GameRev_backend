@@ -1,3 +1,4 @@
+using FluentValidation;
 using GameRev.DTOs.Requests;
 using GameRev.DTOs.Requests.Update;
 using GameRev.Models.Entities;
@@ -13,11 +14,12 @@ public class PlatformController : ControllerBase
 {
 
     private readonly IPlatformService platformService;
-    private readonly PlatformValidator platformValidator;
+    private readonly IValidator<PlatformRequest> platformValidator;
 
-    public PlatformController(IPlatformService platformService)
+    public PlatformController(IPlatformService platformService, IValidator<PlatformRequest> platformValidator)
     {
         this.platformService = platformService;
+        this.platformValidator = platformValidator;
     }
 
     [HttpGet]
@@ -43,12 +45,12 @@ public class PlatformController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddNew (PlatformRequest request, CancellationToken ct)
+    public async Task<IActionResult> AddNew ([FromBody] PlatformRequest request, CancellationToken ct)
     {
         var validationResult = await platformValidator.ValidateAsync(request, ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest("Validation Error");
+            return BadRequest(validationResult.Errors);
         }
         var platform = await platformService.AddAsync(request,ct);
         if(platform is null)
@@ -59,7 +61,7 @@ public class PlatformController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update (UpdatePlatformRequest request, CancellationToken ct)
+    public async Task<IActionResult> Update ([FromBody] UpdatePlatformRequest request, CancellationToken ct)
     {
         var success = await platformService.UpdatePlatformAsync(request,ct);
         if (!success)
@@ -70,7 +72,7 @@ public class PlatformController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<IActionResult> Delete (long id, CancellationToken ct)
+    public async Task<IActionResult> Delete ([FromQuery] long id, CancellationToken ct)
     {
         var success = await platformService.DeleteAsync(id,ct);
         if (!success)

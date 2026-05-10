@@ -92,7 +92,7 @@ public class AppDbContext : DbContext
             u.Property(u => u.Email).HasColumnName("email").HasMaxLength(64).IsRequired();
             u.Property(u => u.Password).HasColumnName("password").HasMaxLength(64).IsRequired();
             u.Property(u => u.RegistrationDate).HasColumnName("registration_date").IsRequired();
-            u.Property(u => u.LastAccess).HasColumnName("last_access_date").IsRequired();
+            u.Property(u => u.LastAccess).HasColumnName("last_access_date");
             u.Property(u => u.Role).HasColumnName("role").HasDefaultValue(UserRole.BASIC).IsRequired();
         });
 

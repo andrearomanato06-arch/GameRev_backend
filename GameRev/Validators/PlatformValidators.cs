@@ -20,17 +20,17 @@ public class PlatformValidator : AbstractValidator<PlatformRequest>
 }
 
 
-public class VideogamePlatformValidator : AbstractValidator<Platform>
-{
-    public VideogamePlatformValidator(IPlatformRepository platformRepository)
-    {
-        // this is a util for checking Platform object in the videogame request
-        RuleFor(x => x.Name)
-            .NotNull().WithMessage("Platform name can't be null")
-            .NotEmpty().WithMessage("Platform name can't be empty")
-            .MustAsync(async (name, ct) =>
-            {
-                return await platformRepository.ExistsByNameAsync(name,ct);
-            }).WithMessage("The platform provided do not exists");
-    }
-}
+// public class VideogamePlatformValidator : AbstractValidator<List<long>>
+// {
+//     public VideogamePlatformValidator(IPlatformRepository platformRepository)
+//     {
+//         // this is a util for checking Platform object in the videogame request
+//         RuleFor(x => )
+//             .NotNull().WithMessage("Platform name can't be null")
+//             .NotEmpty().WithMessage("Platform name can't be empty")
+//             .MustAsync(async (name, ct) =>
+//             {
+//                 return await platformRepository.ExistsByNameAsync(name,ct);
+//             }).WithMessage("The platform provided do not exists");
+//     }
+// }

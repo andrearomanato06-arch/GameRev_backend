@@ -18,4 +18,21 @@ public class PlatformRepository : GenericCrudRepository<Platform>, IPlatformRepo
     {
         return await context.Platforms.AnyAsync(p => p.Name.Equals(name), ct);
     }
+
+    public async Task<bool> ExistsById (long id, CancellationToken ct)
+    {
+        return await context.Platforms.AnyAsync(p => p.Id == id,ct);
+    }
+
+    public async Task<List<Platform>> GetByIds(List<long> platformsIds)
+    {
+        List<Platform> platforms = [];
+        foreach(long id in platformsIds)
+        {
+            var x = await context.Platforms.Where(p => p.Id == id).FirstOrDefaultAsync();
+            if(x is not null)
+                platforms.Add(x);
+        }
+        return platforms;
+    }
 }

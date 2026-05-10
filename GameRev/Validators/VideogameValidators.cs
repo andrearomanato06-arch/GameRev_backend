@@ -9,7 +9,7 @@ public class VideogameRequestValidators : AbstractValidator<VideogameRequest>
     public VideogameRequestValidators(IAuthorRepository authorRepository, IPlatformRepository platformRepository)
     {
         RuleFor(x => x.Title)
-            .NotNull().WithMessage("Title can't be  null")
+            .NotNull().WithMessage("Title can't be null")
             .NotEmpty().WithMessage("Title can't be empty");
         
         RuleFor(x => x.Description)
@@ -32,7 +32,13 @@ public class VideogameRequestValidators : AbstractValidator<VideogameRequest>
             .NotNull().WithMessage("Released info can't be  null")
             .NotEmpty().WithMessage("Released infos can't be empty");
        
-        RuleForEach(x => x.Platforms).SetValidator(new VideogamePlatformValidator(platformRepository));
+        RuleForEach(x => x.Platforms)
+        .NotNull().WithMessage("Platforms list can't be null")
+        .NotEmpty().WithMessage("Platforms list can't be empty")
+        .MustAsync(async (platformId, CancellationToken ) =>
+        {
+            return await platformRepository.ExistsById(platformId, CancellationToken);
+        }).WithMessage("A non valid platform was given, please check");
         
         When(x => x.AuthorId > 0, () =>
         {

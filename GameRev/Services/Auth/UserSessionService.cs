@@ -68,7 +68,7 @@ public class UserSessionService : IUserSessionService
         }
 
         //! ENV DATA
-        var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SetUpIn.ENV_FILE_PLS"));
+        var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SetUpIn.ENV_FILE_PLS_polivinilcloruroesplosivo"));
         var duration = session.IssuedAt.AddMinutes(60); // configure from .env
         var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 

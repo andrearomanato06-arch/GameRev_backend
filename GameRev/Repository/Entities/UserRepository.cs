@@ -33,6 +33,6 @@ public class UserRepository : GenericCrudRepository<User>, IUserRepository
 
     public async Task<bool> ExistsById (long id, CancellationToken ct)
     {
-        return await context.Users.Where(u => u.Id == id).FirstOrDefaultAsync(ct) is not null;
+        return await context.Users.AnyAsync(u => u.Id == id,ct);
     }
 }

@@ -1,3 +1,4 @@
+using FluentValidation;
 using GameRev.DTOs.Filters;
 using GameRev.DTOs.Requests;
 using GameRev.DTOs.Requests.Update;
@@ -13,11 +14,12 @@ public class VideogameController : ControllerBase
 {
 
     private readonly IVideogameService videogameService;
-    private readonly VideogameRequestValidators videogameValidator;
+    private readonly IValidator<VideogameRequest> videogameValidator;
 
-    public VideogameController(IVideogameService videogameService)
+    public VideogameController(IVideogameService videogameService, IValidator<VideogameRequest> videogameValidator)
     {
         this.videogameService = videogameService;
+        this.videogameValidator = videogameValidator;
     }
 
     [HttpGet("casual/{limit}")]
@@ -30,7 +32,7 @@ public class VideogameController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById ([FromRoute] long id, CancellationToken ct)
     {
-        var videogame = videogameService.GetByIdAsync(id,ct);
+        var videogame = await videogameService.GetByIdAsync(id,ct);
         if(videogame is null)
         {
             return NotFound("The specified videogame can't be found in the system");
@@ -76,12 +78,12 @@ public class VideogameController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddNewVideogame ([FromBody] VideogameRequest request, CancellationToken ct)
+    public async Task<IActionResult> AddNewVideogame ([FromForm] VideogameRequest request, CancellationToken ct)
     {
         var validationResult = await videogameValidator.ValidateAsync(request,ct);
         if (!validationResult.IsValid)
         {
-            return BadRequest("Validation Error");
+            return BadRequest(validationResult.Errors);
         }
         var videogame = await videogameService.AddAsync(request,ct);
         if(videogame is null)
@@ -92,7 +94,7 @@ public class VideogameController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> EditVideogame ([FromBody] UpdateVideogameRequest request, CancellationToken ct)
+    public async Task<IActionResult> EditVideogame ([FromForm] UpdateVideogameRequest request, CancellationToken ct)
     {
         //validator
         var success = await videogameService.UpdateAsync(request, ct);
@@ -103,8 +105,8 @@ public class VideogameController : ControllerBase
         return Ok();
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteVideogame ([FromRoute] long id, CancellationToken ct)
+    [HttpDelete]
+    public async Task<IActionResult> DeleteVideogame ([FromQuery] long id, CancellationToken ct)
     {
         var success = await videogameService.RemoveAsync(id,ct);
         if (!success)

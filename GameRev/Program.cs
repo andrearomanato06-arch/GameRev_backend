@@ -19,6 +19,13 @@ builder.Services.AddDbContext(builder.Configuration);
 
 builder.Services.AddRepositories();
 builder.Services.AddServices();
+builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+    {
+        // Questo impedisce ad ASP.NET di inviare il 400 automatico
+        // permettendo alla richiesta di arrivare al tuo codice
+        options.SuppressModelStateInvalidFilter = true;
+    });
+builder.Services.AddRequestsValidators();
 
 builder.Services.AddCors(options => {
     options.AddPolicy("GameRevPolicy", policy => {
@@ -26,55 +33,55 @@ builder.Services.AddCors(options => {
     });
 });
 
-builder.Services.AddAuthentication(
-    JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = false,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = "PVC.sbiruli.it", //! ENV DATA
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("simoncinolimoncinosbirulinoballerinopiccolinopatatinotonypitony"))
-    };
+// builder.Services.AddAuthentication(
+//     JwtBearerDefaults.AuthenticationScheme)
+//     .AddJwtBearer(options =>{
+//     options.TokenValidationParameters = new TokenValidationParameters
+//     {
+//         ValidateIssuer = true,
+//         ValidateAudience = false,
+//         ValidateLifetime = true,
+//         ValidateIssuerSigningKey = true,
+//         ValidIssuer = "PVC.sbiruli.it", //! ENV DATA
+//         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("simoncinolimoncinosbirulinoballerinopiccolinopatatinotonypitony"))
+//     };
 
-    options.Events = new JwtBearerEvents
-    {
-        OnTokenValidated = async context =>
-        {
-            var database = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
-            var tokenUserId = context.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var tokenJtid = context.Principal.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+//     options.Events = new JwtBearerEvents
+//     {
+//         OnTokenValidated = async context =>
+//         {
+//             var database = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
+//             var tokenUserId = context.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+//             var tokenJtid = context.Principal.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
 
-            if(string.IsNullOrEmpty(tokenUserId) || string.IsNullOrEmpty(tokenJtid))
-            {
-                context.Fail("Invalid token credentials given");
-                return;
-            }
+//             if(string.IsNullOrEmpty(tokenUserId) || string.IsNullOrEmpty(tokenJtid))
+//             {
+//                 context.Fail("Invalid token credentials given");
+//                 return;
+//             }
 
-            long userId = long.Parse(tokenUserId);
-            long jtid = long.Parse(tokenJtid);
+//             long userId = long.Parse(tokenUserId);
+//             long jtid = long.Parse(tokenJtid);
 
-            var session = await database.UserSessions.FirstOrDefaultAsync(s => s.UserId == userId && s.Jtid == jtid);
+//             var session = await database.UserSessions.FirstOrDefaultAsync(s => s.UserId == userId && s.Jtid == jtid);
 
-            if(session is null)
-            {
-                context.Fail("The current session seems to be expired, please log in again");
-            }
-        }
-    };
-});
+//             if(session is null)
+//             {
+//                 context.Fail("The current session seems to be expired, please log in again");
+//             }
+//         }
+//     };
+// });
 
-builder.Services.AddAuthorization();
+// builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
 app.UseStaticFiles();
 
-app.UseAuthentication();
-app.UseAuthorization();
-
+// app.UseAuthentication();
+// app.UseAuthorization();
+app.MapControllers();
 app.UseCors("GameRevPolicy");
 
 app.Run();

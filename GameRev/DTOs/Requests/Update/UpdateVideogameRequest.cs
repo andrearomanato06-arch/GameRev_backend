@@ -18,7 +18,7 @@ public class UpdateVideogameRequest
 
     public bool Released {get;set;} = true;
 
-    public List<Platform>? Platforms {get;set;} = [];
+    public List<long>? Platforms {get;set;} = [];
 
     public long? AuthorId {get;set;}
 }

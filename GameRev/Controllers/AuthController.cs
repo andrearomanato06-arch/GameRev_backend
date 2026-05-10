@@ -18,15 +18,21 @@ public class AuthController : ControllerBase
     private readonly IValidator<RegistrationRequest> registrationValidator;
     private readonly IValidator<LoginRequest> loginValidator;
 
-    public AuthController(IAccessService accessService, IUserSessionService userSessionService)
-    {
+    public AuthController(IAccessService accessService, IValidator<RegistrationRequest> registrationValidator, IValidator<LoginRequest> loginValidator)
+    { 
         this.accessService = accessService;
+        this.registrationValidator = registrationValidator;
+        this.loginValidator = loginValidator;
     }
 
     [HttpPost("user/register")]
     public async Task<IActionResult> RegisterUser ([FromBody] RegistrationRequest request, CancellationToken ct)
     {
-
+        var validationResult = await registrationValidator.ValidateAsync(request,ct);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
         var userRequest = RequestToRequest.RegistrationRequestToUserRequest(request);
         var user = await accessService.Register(userRequest, ct);
         if(user is null)
@@ -39,10 +45,10 @@ public class AuthController : ControllerBase
     [HttpPost("admin/register")]
     public async Task<IActionResult> RegisterAdmin ([FromBody] RegistrationRequest request, CancellationToken ct)
     {
-        var validationResut = await registrationValidator.ValidateAsync(request,ct);
-        if (!validationResut.IsValid)
+        var validationResult = await registrationValidator.ValidateAsync(request,ct);
+        if (!validationResult.IsValid)
         {
-            return BadRequest("Invalid data given during registration");
+            return BadRequest(validationResult.Errors);
         }
         var userRequest = RequestToRequest.RegistrationRequestToAdminRequest(request);
         var user = await accessService.Register(userRequest, ct);
@@ -56,10 +62,10 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login ([FromBody] LoginRequest request, CancellationToken ct)
     {
-        var validationResut = await loginValidator.ValidateAsync(request, ct);
-        if (!validationResut.IsValid)
+        var validationResult = await loginValidator.ValidateAsync(request, ct);
+        if (!validationResult.IsValid)
         {
-            return BadRequest("Invalid credential given");
+            return BadRequest(validationResult.Errors);
         }
         var token = await accessService.Login(request, ct);
         if(token is null)

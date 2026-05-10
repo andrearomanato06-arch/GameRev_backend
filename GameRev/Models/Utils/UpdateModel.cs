@@ -1,5 +1,7 @@
 using GameRev.DTOs.Requests.Update;
 using GameRev.Models.Entities;
+using GameRev.Repository.Entities;
+using GameRev.Repository.Entities.Interfaces;
 
 namespace GameRev.Models.Utils;
 
@@ -36,7 +38,7 @@ public static class UpdateModel
             review.Description = request.Description;        
     }
 
-    public static void UpdateVideogameFromDto(Videogame videogame, UpdateVideogameRequest request, string? coverImage)
+    public async static Task UpdateVideogameFromDto(Videogame videogame, UpdateVideogameRequest request, string? coverImage, IPlatformRepository platformRepository)
     {
         if(request.Title is not null)
             videogame.Title = request.Title;
@@ -56,7 +58,7 @@ public static class UpdateModel
             videogame.Released = false;
         
         if(request.Platforms is not null)
-            videogame.Platforms = request.Platforms;
+            videogame.Platforms = await platformRepository.GetByIds(request.Platforms);
 
         if(request.AuthorId is not null)
             videogame.AuthorId = request.AuthorId;
